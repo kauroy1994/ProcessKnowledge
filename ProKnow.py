@@ -97,6 +97,7 @@ class SI(object):
 
     def optimize(self,data):
 
+        c = 1
         while (self.objective(data) >= 0.01):
             ntheta = len(self.Theta)
             #print ("Objective before", self.objective(data))  
@@ -107,8 +108,9 @@ class SI(object):
                     change = -self.objective_change(data_point,j,order=1)/float(self.objective_change(data_point,j,order=2))
                     total_change += change
                 self.Theta[j] += self.gamma*total_change
-            print ("Objective after ", i, self.objective(data))
+            print ("Objective after ", c, self.objective(data))
             print ("after optim step",self.Theta)
+            c += 1
     
 #========================TESTER CODE===============================
 data =  [[(0,0),0],[(0,1),1],[(1,0),1],[(1,1),0]]
