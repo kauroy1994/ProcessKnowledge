@@ -1,4 +1,5 @@
 from copy import deepcopy
+from random import random,choice
 class SI(object):
 
 
@@ -52,10 +53,25 @@ class SI(object):
     def change(self,x,order=1):
 
         return (self.approx(x,delta = order) - (self.approx(x)))
+
+    def optimize(self):
+        pass
             
 
 data =  [[(0,0),0],[(0,1),1],[(1,0),1],[(1,1),0]]
+
 data = data*10
+gen_data = []
+
+N = len(data)
+for i in range(N):
+    item = deepcopy(data[i])
+    if random() > 0.9:
+        item[1] = 1 - item[1]
+        gen_data.append(item)
+    else:
+        gen_data.append(item)
+    
 o = SI()
-o.calc_prob(data)
+o.calc_prob(gen_data)
 print (o.probs)
