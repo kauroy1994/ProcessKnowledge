@@ -8,6 +8,7 @@ class SI(object):
     def  __init__(self):
 
         self.epsilon = 0.0001
+        self.gamma = 1.0
 
         self.probs = {(0,0):0.0,
                       (0,1):0.0,
@@ -33,7 +34,7 @@ class SI(object):
         prod = 1
         lfeatures = len(x)
         for i in range(lfeatures):
-            prod *= x[i]*item[i]-Theta[i]
+            prod *= (((x[i]+0.001)/float(x[i]+0.001))*((item[i]+0.001)/float(item[i]+0.001)))-Theta[i]
 
         return (prod)
 
@@ -52,10 +53,10 @@ class SI(object):
                 p += item_prod
 
             if (y):
-                total += log(max(0,p)+0.0001) #log domain error corrections
+                total += -log(max(0,p)+0.0001) #log domain error corrections
             
             else:
-                total += log(max(0,1-p)+0.0001) #log domain error corrections
+                total += -log(max(0,1-p)+0.0001) #log domain error corrections
 
         return (total)
 
@@ -85,35 +86,35 @@ class SI(object):
         x = data_point[0]
 
         if (y):
-            delta_loss = log(max(0,(self.approx(x,theta_index,delta = order)))+0.0001)
-            loss = log(max(0,(self.approx(x,theta_index)))+0.0001) #log domain error corrections
+            delta_loss = -log(max(0,(self.approx(x,theta_index,delta = order)))+0.0001)
+            loss = -log(max(0,(self.approx(x,theta_index)))+0.0001) #log domain error corrections
             
         else:
-            delta_loss = log(max(0,(1 - self.approx(x,theta_index,delta = order)))+0.0001)
-            loss = log(max(0,(1 - self.approx(x,theta_index)))+0.0001) #log domain error corrections
+            delta_loss = -log(max(0,(1 - self.approx(x,theta_index,delta = order)))+0.0001)
+            loss = -log(max(0,(1 - self.approx(x,theta_index)))+0.0001) #log domain error corrections
 
         return ((delta_loss - loss)+(1*int(order==2)))
 
     def optimize(self,data):
 
-        for i in range(2):
+        for i in range(10):
             ntheta = len(self.Theta)
-            print ("Objective before", self.objective(data))  
+            #print ("Objective before", self.objective(data))  
             #print ("before optim step",self.Theta)
-            input()
             for j in range(ntheta):
                 total_change = 0.0
                 for data_point in data:
                     change = -self.objective_change(data_point,j,order=1)/float(self.objective_change(data_point,j,order=2))
                     total_change += change
-                self.Theta[j] += total_change
+                self.Theta[j] += self.gamma*total_change
             print ("Objective after ", self.objective(data))
-            #print ("after optim step",self.Theta)
+            print ("after optim step",self.Theta)
+            input()
     
 #========================TESTER CODE===============================
 data =  [[(0,0),0],[(0,1),1],[(1,0),1],[(1,1),0]]
 
-data = data*10
+data = data*100
 gen_data = []
 
 N = len(data)
