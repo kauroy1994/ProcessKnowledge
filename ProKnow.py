@@ -8,7 +8,7 @@ class SI(object):
     def  __init__(self):
 
         self.epsilon = 0.0001
-        self.gamma = 1.0
+        self.gamma = 5.0
 
         self.probs = {(0,0):0.0,
                       (0,1):0.0,
@@ -97,7 +97,7 @@ class SI(object):
 
     def optimize(self,data):
 
-        for i in range(10):
+        while (self.objective(data) >= 0.01):
             ntheta = len(self.Theta)
             #print ("Objective before", self.objective(data))  
             #print ("before optim step",self.Theta)
@@ -107,9 +107,8 @@ class SI(object):
                     change = -self.objective_change(data_point,j,order=1)/float(self.objective_change(data_point,j,order=2))
                     total_change += change
                 self.Theta[j] += self.gamma*total_change
-            print ("Objective after ", self.objective(data))
+            print ("Objective after ", i, self.objective(data))
             print ("after optim step",self.Theta)
-            input()
     
 #========================TESTER CODE===============================
 data =  [[(0,0),0],[(0,1),1],[(1,0),1],[(1,1),0]]
@@ -120,7 +119,7 @@ gen_data = []
 N = len(data)
 for i in range(N):
     item = deepcopy(data[i])
-    if random() > 0.9:
+    if random() > 0.99:
         item[1] = 1 - item[1]
         gen_data.append(item)
     else:
