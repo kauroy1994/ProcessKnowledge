@@ -37,10 +37,27 @@ class SI(object):
 
         return (prod)
 
-    def objective(self):
+    def objective(self,data):
 
-        result = 0.0
-        
+        total = 0.0
+        for data_point in data:
+            y = data_point[1]
+            x = data_point[0]
+            
+            p = 0.0
+            
+            for item in self.encoding:
+                item_prod = self.probs[item]
+                item_prod *= self.dot_product(x,item,self.Theta)
+                p += item_prod
+
+            if (y):
+                total += log(max(0,p)+0.0001) #log domain error corrections
+            
+            else:
+                total += log(max(0,1-p)+0.0001) #log domain error corrections
+
+        return (total)
 
     def approx(self,x,theta_index,delta = False):
         
@@ -81,7 +98,8 @@ class SI(object):
 
         for i in range(2):
             ntheta = len(self.Theta)
-            print ("before optim step",self.Theta)
+            print ("Objective before", self.objective(data))  
+            #print ("before optim step",self.Theta)
             input()
             for j in range(ntheta):
                 total_change = 0.0
@@ -89,8 +107,8 @@ class SI(object):
                     change = -self.objective_change(data_point,j,order=1)/float(self.objective_change(data_point,j,order=2))
                     total_change += change
                 self.Theta[j] += total_change
-            print ("after optim step",self.Theta)
-            input()
+            print ("Objective after ", self.objective(data))
+            #print ("after optim step",self.Theta)
     
 #========================TESTER CODE===============================
 data =  [[(0,0),0],[(0,1),1],[(1,0),1],[(1,1),0]]
