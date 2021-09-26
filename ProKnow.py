@@ -1,5 +1,7 @@
 from copy import deepcopy
 from random import random,choice
+from math import log
+
 class SI(object):
 
 
@@ -34,30 +36,63 @@ class SI(object):
             prod *= x[i]*item[i]-Theta[i]
 
         return (prod)
+
+    def objective(self):
+
+        result = 0.0
         
 
-    def approx(self,x,delta = False):
+    def approx(self,x,theta_index,delta = False):
         
         epsilon = self.epsilon
         result = 0.0
         Theta = deepcopy(self.Theta)
-        Theta = [(i + delta*epsilon) for i in Theta if delta]
+
+        if delta:
+            ntheta = len(Theta)
+            for i in range(ntheta):
+                if (i == theta_index):
+                    Theta[i] += delta*epsilon
         
-        for item in self.Theta:
-            item_prod = self.probs(item)
+        for item in self.encoding:
+            item_prod = self.probs[item]
             item_prod *= self.dot_product(x,item,Theta)
             result += item_prod
 
         return (result)
 
-    def change(self,x,order=1):
+    def objective_change(self,data_point,theta_index,order=1):
 
-        return (self.approx(x,delta = order) - (self.approx(x)))
+        delta_objective,objective = None,None
+        y = data_point[1]
+        x = data_point[0]
 
-    def optimize(self):
-        pass
+        if (y):
+            delta_loss = log(max(0,(self.approx(x,theta_index,delta = order)))+0.0001)
+            loss = log(max(0,(self.approx(x,theta_index)))+0.0001) #log domain error corrections
             
+        else:
+            delta_loss = log(max(0,(1 - self.approx(x,theta_index,delta = order)))+0.0001)
+            loss = log(max(0,(1 - self.approx(x,theta_index)))+0.0001) #log domain error corrections
 
+        return ((delta_loss - loss)+(1*int(order==2)))
+
+    def optimize(self,data):
+
+        for i in range(2):
+            ntheta = len(self.Theta)
+            print ("before optim step",self.Theta)
+            input()
+            for j in range(ntheta):
+                total_change = 0.0
+                for data_point in data:
+                    change = -self.objective_change(data_point,j,order=1)/float(self.objective_change(data_point,j,order=2))
+                    total_change += change
+                self.Theta[j] += total_change
+            print ("after optim step",self.Theta)
+            input()
+    
+#========================TESTER CODE===============================
 data =  [[(0,0),0],[(0,1),1],[(1,0),1],[(1,1),0]]
 
 data = data*10
@@ -74,4 +109,5 @@ for i in range(N):
     
 o = SI()
 o.calc_prob(gen_data)
-print (o.probs)
+o.optimize(gen_data)
+#print (o.probs)
