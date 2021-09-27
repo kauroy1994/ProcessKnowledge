@@ -118,7 +118,9 @@ class SI(object):
     def optimize(self,data):
 
         c = 1
-        while (abs(self.objective(data)) >= 0.01):
+        while (True):
+            if self.objective(data) <= 0.01:
+                break
             ntheta = len(self.Theta)
             #print ("Objective before", self.objective(data))  
             #print ("before optim step",self.Theta)
