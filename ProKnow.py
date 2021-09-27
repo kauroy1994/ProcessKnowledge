@@ -8,7 +8,7 @@ class SI(object):
     def  __init__(self):
 
         self.epsilon = 0.0001
-        self.gamma = 5.0
+        self.gamma = 1.0
 
         self.probs = {(0,0):0.0,
                       (0,1):0.0,
@@ -119,7 +119,7 @@ class SI(object):
 
         c = 1
         while (True):
-            if self.objective(data) <= 0.01:
+            if self.objective(data) <= 0.01: #convergence criteria
                 break
             ntheta = len(self.Theta)
             #print ("Objective before", self.objective(data))  
