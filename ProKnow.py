@@ -66,16 +66,36 @@ class SI(object):
         result = 0.0
         Theta = deepcopy(self.Theta)
 
-        if delta:
+        if delta == 1: #f(theta + epsilon)
             ntheta = len(Theta)
             for i in range(ntheta):
                 if (i == theta_index):
-                    Theta[i] += delta*epsilon
+                    Theta[i] += epsilon
+            for item in self.encoding:
+                item_prod = self.probs[item]
+                item_prod *= self.dot_product(x,item,Theta)
+                result += item_prod
+
+        elif delta == 2: #f(theta + epsilon) + f(theta - epsilon)
+
+            ntheta = len(Theta)
+            for i in range(ntheta):
+                if (i == theta_index):
+                    Theta[i] += epsilon
+            for item in self.encoding:
+                item_prod = self.probs[item]
+                item_prod *= self.dot_product(x,item,Theta)
+                result += item_prod
+
+            ntheta = len(Theta)
+            for i in range(ntheta):
+                if (i == theta_index):
+                    Theta[i] -= 2*epsilon
+            for item in self.encoding:
+                item_prod = self.probs[item]
+                item_prod *= self.dot_product(x,item,Theta)
+                result += item_prod
         
-        for item in self.encoding:
-            item_prod = self.probs[item]
-            item_prod *= self.dot_product(x,item,Theta)
-            result += item_prod
 
         return (result)
 
@@ -93,12 +113,12 @@ class SI(object):
             delta_loss = -log(max(0,(1 - self.approx(x,theta_index,delta = order)))+0.0001)
             loss = -log(max(0,(1 - self.approx(x,theta_index)))+0.0001) #log domain error corrections
 
-        return ((delta_loss - loss)+(1*int(order==2)))
+        return ((delta_loss - order*loss)+(1*int(order==2)))/float(self.epsilon**order)
 
     def optimize(self,data):
 
         c = 1
-        while (self.objective(data) >= 0.01):
+        while (abs(self.objective(data)) >= 0.01):
             ntheta = len(self.Theta)
             #print ("Objective before", self.objective(data))  
             #print ("before optim step",self.Theta)
@@ -121,7 +141,7 @@ gen_data = []
 N = len(data)
 for i in range(N):
     item = deepcopy(data[i])
-    if random() > 0.99:
+    if random() > 1.0:
         item[1] = 1 - item[1]
         gen_data.append(item)
     else:
